@@ -6,9 +6,10 @@ import os
 import random
 # pip install python-dotenv
 from dotenv import load_dotenv
+from ec2_metadata import ec2_metadata
 
 # Imports the environment variables
-load_dotenv()
+load_dotenv("token.env")
 # Creates a discord client to send a request to the discord API
 client = discord.Client()
 # Pulling our token from the token.env file for discord bot
@@ -18,9 +19,7 @@ token = os.getenv('TOKEN')
 intents = discord.Intents.all()
 intents.message_content = True  # Make sure the bot has the proper permissions
 client = discord.Client(intents=intents)
-# Declaring intents for commands
-intents.members = True
-bot = commands.Bot(command_prefix = ".", intents = intents)
+
                       
 # Using on_ready to print the name of our bot
 ## Discord API command
@@ -51,16 +50,20 @@ async def on_message(message):
                      "Why is she called llene? She stands on equal legs.",
                      "What do you call a gazelle in a lions territory? Denzel."]
             await message.channel.send(random.choice(jokes))
+        elif user_message.lower() == "region":
+            await message.channel.send(f'Your EC2 region is {ec2_metadata.region}')
+            return
+        elif user_message.lower() == "ip":
+            await message.channel.send(f'Your public ip is {ec2_metadata.public_ipv4}')
+            return
+        elif user_message.lower() == "zone":
+            await message.channel.send(f'Your availbility zone is {ec2_metadata.availability_zone}')
+            return
+        elif user_message.lower() == "tell me about my server":
+            await message.channel.send(f'Your EC2 region is {ec2_metadata.region}, Your public ip is {ec2_metadata.public_ipv4}, Your availbility zone is {ec2_metadata.availability_zone} ')
+            return
 # End Bot Responses
 
-# Allows the bot to listen to commands
-bot = commands.Bot(command_prefix="!")
-                      
-# Creating a command
-@bot.command(pass_context = True)
-async def ping(ctx):
-    await ctx.send("Pong!")
 
 #Test code
 client.run(token)
-bot.run(token)
